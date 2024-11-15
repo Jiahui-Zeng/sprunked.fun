@@ -79,20 +79,23 @@
         
         @media (max-width: 768px) {
             .game-container.fullscreen {
-                width: 100vw;
-                height: 100vh;
-            }
-        
-            .game-container.fullscreen iframe {
-                width: 100%;
-                height: 100%;
                 position: fixed;
                 top: 0;
                 left: 0;
-                right: 0;
-                bottom: 0;
-                object-fit: contain;
-                transform: none !important; /* Remove any rotation */
+                width: 100vw;
+                height: 100vh;
+                transform: rotate(90deg);
+                transform-origin: bottom left;
+                background: #000;
+            }
+        
+            .game-container.fullscreen iframe {
+                width: 100vh;
+                height: 100vw;
+                transform-origin: top left;
+                position: absolute;
+                top: 0;
+                left: 0;
             }
         }
         
@@ -144,7 +147,6 @@
             align-items: center;
             gap: 5px;
             z-index: 100;
-            transition: background-color 0.3s ease;
         }
         
         .fullscreen-btn:hover {
@@ -544,6 +546,14 @@
                 if (!document.fullscreenElement) {
                     // Enter fullscreen
                     gameContainer.classList.add('fullscreen');
+                    if (screen.orientation && screen.orientation.lock) {
+                        try {
+                            await screen.orientation.lock('landscape');
+                        } catch (e) {
+                            console.log('Orientation lock not supported');
+                        }
+                    }
+        
                     if (gameContainer.requestFullscreen) {
                         await gameContainer.requestFullscreen();
                     } else if (gameContainer.webkitRequestFullscreen) {
@@ -557,12 +567,14 @@
                         await document.exitFullscreen();
                     } else if (document.webkitExitFullscreen) {
                         await document.webkitExitFullscreen();
-                    } else if (document.msExitFullscreen) {
-                        await document.msExitFullscreen();
+                    }
+
+                    if (screen.orientation && screen.orientation.unlock) {
+                        screen.orientation.unlock();
                     }
                 }
             } catch (err) {
-                console.error('Error attempting to toggle full-screen:', err);
+                console.error('Error toggling fullscreen:', err);
             }
         }
         
@@ -580,7 +592,6 @@
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
         document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
     </script>
 </body>
 </html>
