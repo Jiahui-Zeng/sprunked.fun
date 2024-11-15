@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprunked - Interactive Music Creation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f5f5f7;
+            --text-color: #1d1d1f;
+            --accent-color: #007AFF;
+            --secondary-color: #5856D6;
+            --gradient-start: #007AFF;
+            --gradient-end: #5856D6;
+            --hover-color: #0071EB;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            color: white;
+            background-image: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+        }
+
+        h1 {
+            font-size: 3em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        section {
+            margin-bottom: 40px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .game-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .game-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 100;
+            transition: background-color 0.3s ease;
+        }
+
+        .fullscreen-btn:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .fullscreen-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .game-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: black;
+        }
+
+        .game-container.fullscreen iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+        iframe {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .features, .tips {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-item, .tip-item {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .feature-item:hover, .tip-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .cta {
+            text-align: center;
+            padding: 40px 0;
+            color: white;
+            border-radius: 10px;
+            background-image: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: var(--text-color);
+            color: white;
+        }
+
+        .toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--accent-color);
+            padding: 10px 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .toolbar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .toolbar li {
+            margin: 0 15px;
+        }
+
+        .toolbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: opacity 0.3s ease;
+        }
+
+        .toolbar a:hover {
+            opacity: 0.8;
+        }
+
+        .faq-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .faq-item {
+            margin-bottom: 15px;
+        }
+
+        .faq-question {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background-color: var(--hover-color);
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 0 0 5px 5px;
+            line-height: 1.8;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-question.active::after {
+            content: '-';
+            transform: rotate(180deg);
+        }
+
+        ol li {
+            margin-bottom: 15px;
+            padding-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .toolbar ul {
+                flex-wrap: wrap;
+            }
+            
+            .toolbar li {
+                margin: 5px 10px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .game-container.fullscreen {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="toolbar">
+        <ul>
+            <li><a href="#introduction">Intro</a></li>
+            <li><a href="#game">Play</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-to-play">How to Play</a></li>
+            <li><a href="#tips">Tips</a></li>
+            <li><a href="#faq">FAQ</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h1>Sprunked</h1>
+        <p>Innovative Music Creation Through Interactive Beatmaking</p>
+    </header>
+
+    <main class="container">
+        <section id="introduction">
+            <h2>Welcome to Sprunked</h2>
+            <p>Step into a revolutionary music creation experience with Sprunked, where innovative scratch-based gameplay meets creative expression. As a groundbreaking mod for Incredibox, Sprunked transforms the way you interact with rhythm and sound, offering an intuitive platform where creativity knows no bounds. Developed by @nonnie0474 on cocrea.world, this free browser-based experience brings together unique characters, dynamic sound elements, and the haunting allure of Horror Mode to create something truly special.</p>
+            <p>What sets Sprunked apart is its tactile approach to music creation. By introducing scratch-based mechanics, every swipe and interaction becomes part of your musical journey. Featuring contributions from talented artists like YoungScoller and KagiMusic, Sprunked delivers professional-grade sound elements that elevate your creative possibilities.</p>
+        </section>
+
+        <section id="game">
+            <h2>Play Sprunked</h2>
+            <div class="game-wrapper">
+                <div class="game-container">
+                    <iframe src="https://c.sprunked.org/game/sprunked-v2/index.html" frameBorder="0" width="100%" height="670"></iframe>
+                </div>
+                <button class="fullscreen-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                    Fullscreen
+                </button>
+            </div>
+        </section>
+
+        <section id="features">
+            <h2>Why Play Sprunked?</h2>
+            <div class="features">
+                <div class="feature-item">
+                    <h3>Scratch-Based Gameplay</h3>
+                    <p>Experience music creation like never before with our innovative scratch mechanics. Simply swipe across your screen to reveal and layer hidden sounds into your composition.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Horror Mode</h3>
+                    <p>Dive into a darker musical realm with our unique Horror Mode, perfect for crafting eerie soundscapes and atmospheric compositions.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Professional Sounds</h3>
+                    <p>Create with sound elements from renowned artists like YoungScoller and KagiMusic, adding professional-grade beats to your musical toolkit.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-to-play">
+            <h2>How to Play</h2>
+            <ol>
+                <li>Visit Sprunked in your browser - no downloads needed</li>
+                <li>Choose from our diverse cast of characters</li>
+                <li>Swipe across the screen to reveal hidden sound effects</li>
+                <li>Layer different characters to build complex rhythms</li>
+                <li>Switch to Horror Mode for darker compositions</li>
+            </ol>
+        </section>
+
+        <section id="tips">
+            <h2>Pro Tips</h2>
+            <div class="tips">
+                <div class="tip-item">
+                    <h3>Perfect Your Timing</h3>
+                    <p>Practice synchronizing your scratches with the beat for smoother transitions and more polished compositions.</p>
+                </div>
+                <div class="tip-item">
+                    <h3>Start Simple</h3>
+                    <p>Begin with basic character combinations before attempting complex arrangements. Build your confidence gradually.</p>
+                </div>
+                <div class="tip-item">
+                    <h3>Explore Horror Mode</h3>
+                    <p>Mix horror elements with standard beats for unique compositions that stand out from traditional rhythms.</p>
+                </div>
+            </div>
+        </section>
+      
+        <section id="faq">
+            <h2>Frequently Asked Questions</h2>
+            <ul class="faq-list">
+                <li class="faq-item">
+                    <div class="faq-question">What exactly is Sprunked?</div>
+                    <div class="faq-answer">Sprunked is a free mod for Incredibox that introduces innovative scratch-based gameplay. Developed by @nonnie0474 on cocrea.world, it builds upon the success of other mods like Sprunki while adding unique features like Horror Mode and new characters.</div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">What makes Sprunked different from original Incredibox?</div>
+                    <div class="faq-answer">The key difference lies in Sprunked's scratch-based mechanics, which allows players to reveal hidden sounds by interacting with the screen. This unique feature, combined with Horror Mode and exclusive characters, creates a distinct playing experience.</div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">What is Horror Mode?</div>
+                    <div class="faq-answer">Horror Mode is a special feature in Sprunked that introduces darker, moodier elements to the gameplay. It provides eerie sound effects and visuals, perfect for creating atmospheric compositions that differ from traditional upbeat rhythms.</div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">Do I need to download anything to play?</div>
+                    <div class="faq-answer">No, Sprunked is completely browser-based and requires no downloads or installations. You can access and play the game instantly through your web browser, whether on PC or mobile devices.</div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">Can I play on mobile devices?</div>
+                    <div class="faq-answer">Yes, Sprunked is fully optimized for both PC and mobile play. The HTML-based design ensures smooth performance across all devices, making it accessible whenever and wherever you want to create music.</div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">Who developed Sprunked?</div>
+                    <div class="faq-answer">Sprunked was created by @nonnie0474 on the cocrea.world platform. The developer drew inspiration from other Incredibox mods while introducing innovative features that make Sprunked unique.</div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">Are there new characters in the game?</div>
+                    <div class="faq-answer">Yes, Sprunked features unique characters that each contribute different audio elements to your compositions. The game includes collaborations with artists like YoungScoller and KagiMusic, bringing fresh sounds to the experience.</div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">How do I master the scratch mechanic?</div>
+                    <div class="faq-answer">The best approach is through practice and experimentation. While the scratch-based mechanic may take time to master, exploring different timing and rhythm combinations will help you become more proficient.</div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">What devices can I use to play Sprunked?</div>
+                    <div class="faq-answer">Sprunked works on any device with a modern web browser, whether it's a PC or mobile device. The game's design ensures consistent performance across all supported platforms.</div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">Is Sprunked free to play?</div>
+                    <div class="faq-answer">Yes, Sprunked is completely free to play. You can access all features and create music without any fees or purchases - just visit the website and start playing.</div>
+                </li>
+            </ul>
+        </section>
+
+        <section id="cta" class="cta">
+            <h2>Ready to Begin Your Musical Journey?</h2>
+            <p>Discover why Sprunked is revolutionizing online music creation. Whether you're looking to craft upbeat rhythms or explore darker soundscapes, your next musical masterpiece awaits.</p>
+            <a href="#game" class="cta-button">Create Music Now!</a>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Sprunked. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                const toolbarHeight = document.querySelector('.toolbar').offsetHeight;
+                const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - toolbarHeight;
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add a simple animation to reveal sections as they come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('section').forEach(section => {
+            section.style.opacity = 0;
+            section.style.transform = 'translateY(20px)';
+            section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(section);
+        });
+
+        // FAQ accordion functionality
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const answer = question.nextElementSibling;
+                const isOpen = question.classList.contains('active');
+
+                // Close all other open questions
+                document.querySelectorAll('.faq-question.active').forEach(openQuestion => {
+                    if (openQuestion !== question) {
+                        openQuestion.classList.remove('active');
+                        openQuestion.nextElementSibling.style.display = 'none';
+                    }
+                });
+
+                // Toggle the clicked question
+                question.classList.toggle('active');
+                answer.style.display = isOpen ? 'none' : 'block';
+            });
+        });
+
+        // Fullscreen functionality
+        const fullscreenBtn = document.querySelector('.fullscreen-btn');
+        const gameContainer = document.querySelector('.game-container');
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                if (gameContainer.requestFullscreen) {
+                    gameContainer.requestFullscreen();
+                } else if (gameContainer.webkitRequestFullscreen) {
+                    gameContainer.webkitRequestFullscreen();
+                } else if (gameContainer.msRequestFullscreen) {
+                    gameContainer.msRequestFullscreen();
+                }
+                gameContainer.classList.add('fullscreen');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                gameContainer.classList.remove('fullscreen');
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                gameContainer.classList.remove('fullscreen');
+            }
+        });
+    </script>
+</body>
+</html>
