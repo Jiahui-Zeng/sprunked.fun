@@ -63,6 +63,61 @@
             margin: 20px 0;
         }
 
+        .game-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 100;
+            transition: background-color 0.3s ease;
+        }
+        
+        .fullscreen-btn:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .fullscreen-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Fullscreen styles */
+        .game-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: black;
+        }
+        
+        .game-container.fullscreen iframe {
+            width: 100%;
+            height: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container.fullscreen {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
         iframe {
             border: none;
             border-radius: 10px;
@@ -249,8 +304,16 @@
         </section>
 
         <section id="game">
-            <div class="game-container">
-                <iframe src="https://c.sprunked.org/game/sprunked-v2/index.html" frameBorder="0" width="100%" height="670"></iframe>
+            <div class="game-wrapper">
+                <div class="game-container">
+                    <iframe src="https://c.sprunked.org/game/sprunked-v2/index.html" frameBorder="0" width="100%" height="670"></iframe>
+                </div>
+                <button class="fullscreen-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                    Fullscreen
+                </button>
             </div>
         </section>
 
@@ -408,6 +471,38 @@
                 question.classList.toggle('active');
                 answer.style.display = isOpen ? 'none' : 'block';
             });
+        });
+
+        // Fullscreen functionality
+        const fullscreenBtn = document.querySelector('.fullscreen-btn');
+        const gameContainer = document.querySelector('.game-container');
+        
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                if (gameContainer.requestFullscreen) {
+                    gameContainer.requestFullscreen();
+                } else if (gameContainer.webkitRequestFullscreen) {
+                    gameContainer.webkitRequestFullscreen();
+                } else if (gameContainer.msRequestFullscreen) {
+                    gameContainer.msRequestFullscreen();
+                }
+                gameContainer.classList.add('fullscreen');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                gameContainer.classList.remove('fullscreen');
+            }
+        });
+        
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                gameContainer.classList.remove('fullscreen');
+            }
         });
     </script>
 </body>
