@@ -57,10 +57,72 @@
             padding-bottom: 10px;
         }
 
-        .game-container {
+        .game-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: black;
             display: flex;
             justify-content: center;
-            margin: 20px 0;
+            align-items: center;
+        }
+        
+        .game-container.fullscreen iframe {
+            width: 100%;
+            height: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container.fullscreen {
+                width: 100vw;
+                height: 100vh;
+            }
+        
+            .game-container.fullscreen iframe {
+                width: 100vw;
+                height: 100vh;
+                transform: rotate(90deg) scale(1);
+                transform-origin: center;
+                position: absolute;
+                top: 0;
+                left: 0;
+                object-fit: contain;
+            }
+        
+            /* Add this to handle orientation */
+            @media screen and (orientation: portrait) {
+                .game-container.fullscreen iframe {
+                    transform: rotate(90deg) scale(1);
+                }
+            }
+        
+            @media screen and (orientation: landscape) {
+                .game-container.fullscreen iframe {
+                    transform: none;
+                }
+            }
+        }
+        
+        /* Add styles for the screen rotation message */
+        .rotation-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 10000;
+        }
+        
+        .rotation-message.show {
+            display: block;
         }
 
         .game-wrapper {
@@ -476,32 +538,82 @@
         // Fullscreen functionality
         const fullscreenBtn = document.querySelector('.fullscreen-btn');
         const gameContainer = document.querySelector('.game-container');
+        const rotationMessage = document.querySelector('.rotation-message');
         
-        fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                if (gameContainer.requestFullscreen) {
-                    gameContainer.requestFullscreen();
-                } else if (gameContainer.webkitRequestFullscreen) {
-                    gameContainer.webkitRequestFullscreen();
-                } else if (gameContainer.msRequestFullscreen) {
-                    gameContainer.msRequestFullscreen();
-                }
-                gameContainer.classList.add('fullscreen');
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
+        // Function to check if device is mobile
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Function to handle fullscreen changes
+        function handleFullscreenChange() {
+            if (!document.fullscreenElement && 
+                !document.webkitFullscreenElement && 
+                !document.mozFullScreenElement) {
                 gameContainer.classList.remove('fullscreen');
+                rotationMessage.classList.remove('show');
+                
+                // Reset any applied transformations
+                const iframe = gameContainer.querySelector('iframe');
+                iframe.style.transform = '';
+            }
+        }
+        
+        // Function to enter fullscreen
+        async function enterFullscreen(element) {
+            if (element.requestFullscreen) {
+                await element.requestFullscreen();
+            } else if (element.webkitRequestFullscreen) {
+                await element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                await element.msRequestFullscreen();
+            }
+        }
+        
+        // Function to exit fullscreen
+        function exitFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+        
+        // Event listener for fullscreen button
+        fullscreenBtn.addEventListener('click', async () => {
+            if (!document.fullscreenElement) {
+                gameContainer.classList.add('fullscreen');
+                await enterFullscreen(gameContainer);
+                
+                if (isMobile()) {
+                    rotationMessage.classList.add('show');
+                    setTimeout(() => {
+                        rotationMessage.classList.remove('show');
+                    }, 3000); // Hide message after 3 seconds
+                }
+            } else {
+                gameContainer.classList.remove('fullscreen');
+                exitFullscreen();
             }
         });
         
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                gameContainer.classList.remove('fullscreen');
+        // Listen for fullscreen changes
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            if (gameContainer.classList.contains('fullscreen')) {
+                const iframe = gameContainer.querySelector('iframe');
+                if (window.orientation === 90 || window.orientation === -90) {
+                    iframe.style.transform = 'none';
+                } else {
+                    iframe.style.transform = 'rotate(90deg) scale(1)';
+                }
             }
         });
     </script>
